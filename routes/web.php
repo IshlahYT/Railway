@@ -22,6 +22,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/tests/{id}', [AdminController::class, 'updateTest'])->name('tests.update');
     Route::delete('/tests/{id}', [AdminController::class, 'deleteTest'])->name('tests.delete');
 
+    // Route Video Pengujian
+    Route::post('/videos', [AdminController::class, 'storeVideo'])->name('videos.store');
+    Route::put('/videos/{id}', [AdminController::class, 'updateVideo'])->name('videos.update');
+    Route::delete('/videos/{id}', [AdminController::class, 'deleteVideo'])->name('videos.delete');
+
     // Route Komponen Produk & Galeri Implementasi
     Route::post('/components', [AdminController::class, 'storeComponent'])->name('components.store');
     Route::put('/components/{id}', [AdminController::class, 'updateComponent'])->name('components.update');

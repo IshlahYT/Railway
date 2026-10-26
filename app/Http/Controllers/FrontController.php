@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use App\Models\TestResult;
 use App\Models\ProductComponent;
 use App\Models\TeamMember;
+use App\Models\TestVideo;
 
 class FrontController extends Controller
 {
@@ -15,8 +16,9 @@ class FrontController extends Controller
         $testResults = TestResult::orderBy('id', 'asc')->get();
         $components = ProductComponent::orderBy('sort_order', 'asc')->get();
         $teamCount = TeamMember::count();
+        $videos = TestVideo::orderBy('sort_order', 'asc')->get()->keyBy('video_key');
 
-        return view('home', compact('settings', 'testResults', 'components', 'teamCount'));
+        return view('home', compact('settings', 'testResults', 'components', 'teamCount', 'videos'));
     }
 
     public function team()

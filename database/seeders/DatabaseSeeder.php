@@ -7,6 +7,7 @@ use App\Models\SiteSetting;
 use App\Models\TestResult;
 use App\Models\ProductComponent;
 use App\Models\TeamMember;
+use App\Models\TestVideo;
 
 class DatabaseSeeder extends Seeder
 {
@@ -55,6 +56,14 @@ class DatabaseSeeder extends Seeder
             ['key' => 'review_quote', 'label' => 'Kutipan Hasil Uji Lapangan', 'group' => 'review', 'type' => 'textarea', 'value' => '"Sejak mengimplementasikan prototipe HI 102 pada pengujian jalur rel R54-70, proses pelapisan cat berjalan jauh lebih stabil, presisi semprotan 4 nozzle sangat merata, dan efisiensi waktu meningkat drastis!"'],
             ['key' => 'review_author', 'label' => 'Nama Penguji / Evaluator', 'group' => 'review', 'type' => 'text', 'value' => 'Tim Penguji Lapangan HI 102'],
             ['key' => 'review_role', 'label' => 'Jabatan Penguji', 'group' => 'review', 'type' => 'text', 'value' => 'Divisi Rekayasa & Perawatan Jalan Rel'],
+
+            // Gambar-Gambar Landing Page Utama
+            ['key' => 'hero_image', 'label' => 'Foto Implementasi Hero Card', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/img8_full_front.jpeg'],
+            ['key' => 'blueprint_image', 'label' => 'Gambar CAD Blueprint Dimensi', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/blueprint_dimensi.png'],
+            ['key' => 'motor_img_1', 'label' => 'Foto Motor BLDC 200mm', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/img4_motor_handbrake.jpeg'],
+            ['key' => 'motor_img_2', 'label' => 'Foto Roda Dual Rear-Wheel', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/img5_rear_wheels.jpeg'],
+            ['key' => 'battery_image', 'label' => 'Foto Visual Baterai Li-Ion', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/img1_pump_battery.jpeg'],
+            ['key' => 'review_image', 'label' => 'Foto Detail Mesin (Seksi Evaluasi)', 'group' => 'images', 'type' => 'image', 'value' => 'images/trolley/img6_top_seat.jpeg'],
         ];
 
         foreach ($settings as $s) {
@@ -206,6 +215,80 @@ class DatabaseSeeder extends Seeder
 
         foreach ($teams as $tm) {
             TeamMember::updateOrCreate(['identity_number' => $tm['identity_number']], $tm);
+        }
+
+        // Seed 6 Video Pengujian (5 Video Pengujian Trolley & 1 Video Pengujian Pengecatan)
+        $videos = [
+            [
+                'video_key' => 'lurus',
+                'title' => 'Pengujian Jalan Lurus 3 Mode',
+                'badge' => 'UJI-01 • 3 Mode Kecepatan',
+                'category' => 'Pengujian Trolley',
+                'description' => 'Trolley diuji pada rel lurus dengan mode kecepatan 1 (5 km/jam), mode 2 (10 km/jam), dan mode 3 (15 km/jam). Evaluasi stabilitas, getaran sasis, dan konsistensi kecepatan.',
+                'video_file' => 'videos/PENGUJIAN TROLLEY KEILILING KECEPATAN RENDAH.mp4',
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img8_full_front.jpeg',
+                'sort_order' => 1,
+            ],
+            [
+                'video_key' => 'belok',
+                'title' => 'Pengujian Jalan Belok',
+                'badge' => 'UJI-02 • Tikungan Rel',
+                'category' => 'Pengujian Trolley',
+                'description' => 'Evaluasi stabilitas wahana saat melewati tikungan rel dengan radius lengkung standar.',
+                'video_file' => null,
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img5_rear_wheels.jpeg',
+                'sort_order' => 2,
+            ],
+            [
+                'video_key' => 'wessel',
+                'title' => 'Pengujian Lewat Wessel',
+                'badge' => 'UJI-03 • Turnout / Switch',
+                'category' => 'Pengujian Trolley',
+                'description' => 'Kemampuan melewati wessel (switch/turnout) rel tanpa risiko anjlok (derailment).',
+                'video_file' => null,
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img4_motor_handbrake.jpeg',
+                'sort_order' => 3,
+            ],
+            [
+                'video_key' => 'relpaksa',
+                'title' => 'Pengujian Lewat Rel Paksa',
+                'badge' => 'UJI-04 • Rel Paksa',
+                'category' => 'Pengujian Trolley',
+                'description' => 'Ketahanan impak roda terhadap sambungan rel paksa dan rel kompensasi.',
+                'video_file' => null,
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img7_control_panel.jpeg',
+                'sort_order' => 4,
+            ],
+            [
+                'video_key' => 'mundur',
+                'title' => 'Pengujian Jalan Mundur',
+                'badge' => 'UJI-05 • Reverse Drive',
+                'category' => 'Pengujian Trolley',
+                'description' => 'Pengujian respon motor BLDC dan kontroler saat beroperasi mundur (reverse) dengan beban kerja penuh.',
+                'video_file' => null,
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img6_top_seat.jpeg',
+                'sort_order' => 5,
+            ],
+            [
+                'video_key' => 'ngecat',
+                'title' => 'Pengujian Pengecatan Rel Kereta Api',
+                'badge' => 'LIVE TEST • 10L → 630m',
+                'category' => 'Pengujian Pengecatan',
+                'description' => 'Demonstrasi sprayer airless 4-nozzle pada rel R54-70 dengan keseragaman semprot 86% dan efisiensi 63 meter per liter.',
+                'video_file' => 'videos/PENGUJIAN SPRAYER.mp4',
+                'video_url' => null,
+                'poster_image' => 'images/trolley/img3_sprayer_boom.jpeg',
+                'sort_order' => 6,
+            ],
+        ];
+
+        foreach ($videos as $v) {
+            TestVideo::updateOrCreate(['video_key' => $v['video_key']], $v);
         }
     }
 }
