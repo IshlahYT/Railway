@@ -8,6 +8,7 @@ use App\Models\TestResult;
 use App\Models\ProductComponent;
 use App\Models\TeamMember;
 use App\Models\TestVideo;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
@@ -94,27 +95,53 @@ class AdminController extends Controller
     {
         if (!$this->checkAuth()) return redirect()->route('admin.login');
 
-        // Simpan input teks / textarea biasa
-        foreach ($request->except(['_token', '_method']) as $key => $value) {
-            if (!$request->hasFile($key)) {
-                SiteSetting::updateOrCreate(['key' => $key], ['value' => $value]);
+        // Simpan input teks / textarea biasa (abaikan token, method, active_tab, dan input berkas)
+        foreach ($request->except(['_token', '_method', 'active_tab']) as $key => $value) {
+            if (!$request->hasFile($key) && !preg_match('/_file$/', $key)) {
+                $setting = SiteSetting::firstOrNew(['key' => $key]);
+                $setting->value = $value !== null ? trim((string)$value) : '';
+                if (!$setting->exists) {
+                    $setting->label = ucwords(str_replace('_', ' ', $key));
+                    $setting->group = 'images';
+                    $setting->type  = 'text';
+                }
+                $setting->save();
             }
         }
 
         // Simpan input file gambar
         foreach ($request->allFiles() as $key => $file) {
-            if ($file->isValid()) {
-                $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            if ($file && $file->isValid()) {
+                $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                $cleanName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $cleanName = preg_replace('/[^a-zA-Z0-9_-]/', '', $cleanName) ?: 'card';
+                $filename = time() . '_' . $cleanName . '.' . $extension;
                 $destination = public_path('images/trolley');
                 if (!file_exists($destination)) {
                     mkdir($destination, 0755, true);
                 }
                 $file->move($destination, $filename);
-                SiteSetting::updateOrCreate(['key' => $key], ['value' => 'images/trolley/' . $filename]);
+                $settingKey = preg_replace('/_file$/', '', $key);
+                $setting = SiteSetting::firstOrNew(['key' => $settingKey]);
+                $setting->value = 'images/trolley/' . $filename;
+                if (!$setting->exists) {
+                    $setting->label = ucwords(str_replace('_', ' ', $settingKey));
+                    $setting->group = 'images';
+                    $setting->type  = 'image';
+                }
+                $setting->save();
+            } elseif ($file && !$file->isValid()) {
+                $activeTab = $request->input('active_tab', 'landing_images');
+                return redirect()->to(route('admin.dashboard') . '?tab=' . $activeTab)
+                    ->with('error', 'Gagal mengunggah berkas: ' . $file->getErrorMessage())
+                    ->with('active_tab', $activeTab);
             }
         }
 
-        return back()->with('success', 'Seluruh elemen teks, angka, dan berkas gambar website berhasil diperbarui!');
+        $activeTab = $request->input('active_tab', 'landing_images');
+        return redirect()->to(route('admin.dashboard') . '?tab=' . $activeTab)
+            ->with('success', 'Perubahan gambar, judul, badge, dan deskripsi card berhasil disimpan!')
+            ->with('active_tab', $activeTab);
     }
 
     // =========================================================================
@@ -248,9 +275,12 @@ class AdminController extends Controller
 
         $data = $request->only(['name', 'code', 'category', 'description', 'specification', 'sort_order']);
         
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $file = $request->file('image');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $cleanName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $cleanName = preg_replace('/[^a-zA-Z0-9_-]/', '', $cleanName) ?: 'comp';
+            $filename = time() . '_' . $cleanName . '.' . $extension;
             $destination = public_path('images/trolley');
             if (!file_exists($destination)) {
                 mkdir($destination, 0755, true);
@@ -264,7 +294,9 @@ class AdminController extends Controller
         }
 
         ProductComponent::create($data);
-        return back()->with('success', 'Komponen / Dokumentasi baru berhasil ditambahkan!');
+        return redirect()->to(route('admin.dashboard') . '?tab=komponen')
+            ->with('success', 'Komponen / Dokumentasi baru berhasil ditambahkan!')
+            ->with('active_tab', 'komponen');
     }
 
     public function updateComponent(Request $request, $id)
@@ -273,29 +305,48 @@ class AdminController extends Controller
 
         $comp = ProductComponent::findOrFail($id);
         $data = $request->only(['name', 'code', 'category', 'description', 'specification', 'sort_order']);
+        // Jika category tidak dikirim, pertahankan category yang lama
+        if (!$request->has('category') || empty($data['category'])) {
+            unset($data['category']);
+        }
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
-            $destination = public_path('images/trolley');
-            if (!file_exists($destination)) {
-                mkdir($destination, 0755, true);
+            if ($file->isValid()) {
+                $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+                $cleanName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $cleanName = preg_replace('/[^a-zA-Z0-9_-]/', '', $cleanName) ?: 'comp';
+                $filename = time() . '_' . $cleanName . '.' . $extension;
+                $destination = public_path('images/trolley');
+                if (!file_exists($destination)) {
+                    mkdir($destination, 0755, true);
+                }
+                $file->move($destination, $filename);
+                $data['image_path'] = 'images/trolley/' . $filename;
+            } else {
+                return redirect()->to(route('admin.dashboard') . '?tab=komponen')
+                    ->with('error', 'Gagal mengunggah gambar: ' . $file->getErrorMessage())
+                    ->with('active_tab', 'komponen');
             }
-            $file->move($destination, $filename);
-            $data['image_path'] = 'images/trolley/' . $filename;
         } elseif ($request->filled('existing_image')) {
             $data['image_path'] = $request->input('existing_image');
+        } elseif ($request->filled('image_path')) {
+            $data['image_path'] = $request->input('image_path');
         }
 
         $comp->update($data);
-        return back()->with('success', 'Komponen "' . $comp->name . '" berhasil diperbarui!');
+        return redirect()->to(route('admin.dashboard') . '?tab=komponen')
+            ->with('success', 'Komponen "' . $comp->name . '" berhasil diperbarui!')
+            ->with('active_tab', 'komponen');
     }
 
     public function deleteComponent($id)
     {
         if (!$this->checkAuth()) return redirect()->route('admin.login');
         ProductComponent::findOrFail($id)->delete();
-        return back()->with('success', 'Komponen berhasil dihapus!');
+        return redirect()->to(route('admin.dashboard') . '?tab=komponen')
+            ->with('success', 'Komponen berhasil dihapus!')
+            ->with('active_tab', 'komponen');
     }
 
     // =========================================================================
@@ -351,5 +402,12 @@ class AdminController extends Controller
         if (!$this->checkAuth()) return redirect()->route('admin.login');
         TeamMember::findOrFail($id)->delete();
         return back()->with('success', 'Anggota tim berhasil dihapus!');
+    }
+
+    public function syncSeeder()
+    {
+        if (!$this->checkAuth()) return redirect()->route('admin.login');
+        Artisan::call('seeder:sync');
+        return back()->with('success', 'DatabaseSeeder.php berhasil diperbarui dengan seluruh perubahan dari admin!');
     }
 }

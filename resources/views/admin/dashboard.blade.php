@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8" x-data="{ tab: 'videos' }">
+<div class="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8" x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || '{{ session('active_tab', 'videos') }}' }">
 
     <!-- Header Dashboard -->
     <div class="bg-zinc-900 text-white rounded-2xl sm:rounded-[32px] p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6 shadow-2xl border border-zinc-800">
@@ -18,6 +18,13 @@
             <p class="text-xs sm:text-sm text-zinc-400 max-w-2xl">Kelola 6 video pengujian, foto-foto landing page, komponen CAD, data hasil uji, dan teks website secara real-time.</p>
         </div>
         <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 flex-shrink-0 w-full md:w-auto">
+            <form action="{{ route('admin.sync_seeder') }}" method="POST" class="col-span-2 sm:col-span-1">
+                @csrf
+                <button type="submit" onclick="return confirm('Perbarui file DatabaseSeeder.php dengan seluruh data saat ini?')" class="w-full px-4 py-2.5 rounded-xl sm:rounded-full bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs font-bold transition inline-flex items-center justify-center gap-1.5 border border-emerald-500/30 text-center">
+                    <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
+                    <span>Simpan ke Seeder</span>
+                </button>
+            </form>
             <a href="{{ route('home') }}" target="_blank" class="px-4 py-2.5 rounded-xl sm:rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold transition inline-flex items-center justify-center gap-2 text-center">
                 <span>Lihat Web</span>
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
@@ -60,7 +67,7 @@
             <button @click="tab = 'landing_images'" :class="tab === 'landing_images' ? 'bg-rail-500 text-white shadow-md shadow-rail-500/30 font-bold' : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200 font-semibold'"
                     class="flex-shrink-0 whitespace-nowrap px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition inline-flex items-center gap-2">
                 <i class="fa-solid fa-image"></i>
-                <span>2. Gambar Landing Page (6)</span>
+                <span>2. Gambar Landing Page (3)</span>
             </button>
 
             <button @click="tab = 'komponen'" :class="tab === 'komponen' ? 'bg-rail-500 text-white shadow-md shadow-rail-500/30 font-bold' : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200 font-semibold'"
@@ -81,10 +88,10 @@
                 <span>5. Tim Pengembang ({{ $teams->count() }})</span>
             </button>
 
-            <button @click="tab = 'elemen'" :class="tab === 'elemen' ? 'bg-rail-500 text-white shadow-md shadow-rail-500/30 font-bold' : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200 font-semibold'"
+            <button @click="tab = 'password'" :class="tab === 'password' ? 'bg-rail-500 text-white shadow-md shadow-rail-500/30 font-bold' : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200 font-semibold'"
                     class="flex-shrink-0 whitespace-nowrap px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs transition inline-flex items-center gap-2">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>6. Teks & Statistik Web</span>
+                <i class="fa-solid fa-key"></i>
+                <span>6. Password Admin</span>
             </button>
         </div>
     </div>
@@ -275,13 +282,13 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- TAB 2: MANAJEMEN GAMBAR LANDING PAGE (6 BAGIAN UTAMA DI HOME)         -->
+    <!-- TAB 2: MANAJEMEN GAMBAR LANDING PAGE (3 BAGIAN UTAMA DI HOME)         -->
     <!-- ===================================================================== -->
     <div x-show="tab === 'landing_images'" class="space-y-6 sm:space-y-8" x-cloak>
         <div class="bg-gradient-to-r from-zinc-900 to-zinc-800 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-zinc-700/60 shadow-lg">
             <h3 class="font-extrabold text-sm sm:text-base">Manajemen Gambar Landing Page Home</h3>
             <p class="text-xs text-zinc-300 mt-1">
-                Ganti 6 gambar penting di halaman utama (Hero, Blueprint CAD, Motor BLDC, Roda Belakang, Baterai Li-Ion, dan Foto Evaluasi Mesin).
+                Ganti 3 gambar penting di halaman utama (Hero Section 3D, Blueprint CAD Dimensi, dan Foto Evaluasi Lapangan).
             </p>
         </div>
 
@@ -291,48 +298,44 @@
                 'key' => 'hero_image',
                 'title' => 'Foto Kartu Hero (Depan)',
                 'location' => 'Hero Section 3D (Kiri Bawah)',
-                'default' => 'images/trolley/img1.jpg',
-                'desc' => 'Foto trolley tampak depan dengan bentangan sprayer dan rangka pelindung oranye.'
+                'default' => 'images/trolley/img8_full_front.jpeg',
+                'desc' => 'Foto trolley tampak depan dengan bentangan sprayer dan rangka pelindung oranye.',
+                'text_fields' => [
+                    ['key' => 'hero_floating_badge', 'label' => 'Badge Foto', 'default' => '', 'type' => 'text'],
+                    ['key' => 'hero_floating_footer', 'label' => 'Footer Subtitle', 'default' => 'Dual Battery • 4 Sprayer', 'type' => 'text'],
+                    ['key' => 'hero_floating_card_text', 'label' => 'Deskripsi / Teks Kartu', 'default' => 'Inovasi wahana elektrik otomatis untuk pengecatan dan perawatan rel kereta api R54-70 dengan presisi tinggi.', 'type' => 'textarea'],
+                    ['key' => 'hero_floating_year', 'label' => 'Tahun', 'default' => '©2026 HI 102', 'type' => 'text'],
+                ]
             ],
             [
                 'key' => 'blueprint_image',
                 'title' => 'Gambar CAD Blueprint Dimensi',
                 'location' => 'Seksi 01: Dimensi & Berat',
                 'default' => 'images/trolley/blueprint_dimensi.png',
-                'desc' => 'Gambar teknis proyeksi AutoCAD AC1027 dimensi P 1050 x L 1350 x T 1000 mm.'
-            ],
-            [
-                'key' => 'motor_img_1',
-                'title' => 'Foto Motor BLDC 200mm',
-                'location' => 'Seksi 05: Motor Penggerak (Kartu 1)',
-                'default' => 'images/trolley/img4_motor_handbrake.jpeg',
-                'desc' => 'Foto detail motor brushless DC dan tuas handbrake mekanis di bawah dek.'
-            ],
-            [
-                'key' => 'motor_img_2',
-                'title' => 'Foto Roda Dual Rear-Wheel',
-                'location' => 'Seksi 05: Motor Penggerak (Kartu 2)',
-                'default' => 'images/trolley/img5_rear_wheels.jpeg',
-                'desc' => 'Foto sepasang roda belakang in-wheel dengan flensa baja dan lampu LED bumper.'
-            ],
-            [
-                'key' => 'battery_image',
-                'title' => 'Foto Baterai Li-Ion 58V 15Ah',
-                'location' => 'Seksi 06: Baterai (Kartu Visual)',
-                'default' => 'images/trolley/img1_pump_battery.jpeg',
-                'desc' => 'Foto baterai lithium-ion dan instalasi mesin pompa airless Möllar di atas sasis.'
+                'desc' => 'Gambar teknis proyeksi AutoCAD AC1027 dimensi P 1050 x L 1350 x T 1000 mm.',
+                'text_fields' => [
+                    ['key' => 'blueprint_title', 'label' => 'Judul Kartu', 'default' => 'Blueprint Teknis Trolley ASM v14', 'type' => 'text'],
+                    ['key' => 'blueprint_badge_1', 'label' => 'Badge 1 (CAD)', 'default' => 'CAD Trolley full ASM v14', 'type' => 'text'],
+                    ['key' => 'blueprint_badge_2', 'label' => 'Badge 2 (Software)', 'default' => 'AutoCAD AC1027', 'type' => 'text'],
+                    ['key' => 'blueprint_desc', 'label' => 'Deskripsi Kartu', 'default' => 'Gambar teknis proyeksi AutoCAD AC1027 dimensi P 1050 x L 1350 x T 1000 mm dengan track gauge rel 930 mm.', 'type' => 'textarea'],
+                ]
             ],
             [
                 'key' => 'review_image',
                 'title' => 'Foto Detail Mesin & Kursi',
                 'location' => 'Seksi Evaluasi Lapangan',
                 'default' => 'images/trolley/img6_top_seat.jpeg',
-                'desc' => 'Foto tampak atas dudukan kursi operator aluminium dan kompartemen baterai ganda.'
+                'desc' => 'Foto tampak atas dudukan kursi operator aluminium dan kompartemen baterai ganda.',
+                'text_fields' => [
+                    ['key' => 'review_image_badge', 'label' => 'Badge Foto', 'default' => 'Implementasi Fisik', 'type' => 'text'],
+                    ['key' => 'review_image_title', 'label' => 'Judul Foto', 'default' => 'Dudukan Kursi & Kompartemen', 'type' => 'text'],
+                    ['key' => 'review_image_desc', 'label' => 'Deskripsi Foto', 'default' => 'Tampak atas dudukan kursi operator aluminium dan kompartemen baterai ganda.', 'type' => 'textarea'],
+                ]
             ]
         ];
         @endphp
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             @foreach($landingImages as $img)
             @php
                 $currentVal = $settings[$img['key']] ?? $img['default'];
@@ -357,12 +360,14 @@
                     <p class="text-xs text-zinc-500 leading-relaxed">{{ $img['desc'] }}</p>
                 </div>
 
-                <!-- Form Upload / Ganti Gambar -->
-                <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="pt-2 border-t border-zinc-100 space-y-2.5 text-xs">
+                <!-- Form Upload / Ganti Gambar & Teks Card -->
+                <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="pt-2 border-t border-zinc-100 space-y-3 text-xs">
                     @csrf
+                    <input type="hidden" name="active_tab" value="landing_images">
+
                     <div>
                         <label class="font-bold text-zinc-700 block mb-1">Unggah Berkas Baru:</label>
-                        <input type="file" name="{{ $img['key'] }}" accept="image/*" class="w-full text-xs text-zinc-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-rail-500 file:text-white hover:file:bg-rail-600">
+                        <input type="file" name="{{ $img['key'] }}_file" accept="image/*" class="w-full text-xs text-zinc-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-rail-500 file:text-white hover:file:bg-rail-600">
                     </div>
 
                     <div>
@@ -377,9 +382,28 @@
                         </select>
                     </div>
 
+                    @if(!empty($img['text_fields']))
+                    <div class="pt-2 border-t border-dashed border-zinc-200 space-y-2">
+                        <span class="font-bold text-zinc-700 block text-[11px] uppercase tracking-wider font-mono">Teks & Redaksi Kartu:</span>
+                        @foreach($img['text_fields'] as $tf)
+                        @php
+                            $fieldVal = array_key_exists($tf['key'], $settings) ? $settings[$tf['key']] : $tf['default'];
+                        @endphp
+                        <div>
+                            <label class="block text-[11px] font-semibold text-zinc-600 mb-0.5">{{ $tf['label'] }}</label>
+                            @if($tf['type'] === 'textarea')
+                            <textarea name="{{ $tf['key'] }}" rows="2" placeholder="Kosongkan jika ingin menyembunyikan" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 text-xs focus:border-rail-500 focus:outline-none">{{ $fieldVal }}</textarea>
+                            @else
+                            <input type="text" name="{{ $tf['key'] }}" value="{{ $fieldVal }}" placeholder="Kosongkan jika ingin menyembunyikan" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 text-xs focus:border-rail-500 focus:outline-none">
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+
                     <button type="submit" class="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-rail-500 text-white font-bold transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Simpan Gambar Ini</span>
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Gambar & Redaksi Kartu</span>
                     </button>
                 </form>
             </div>
@@ -425,7 +449,7 @@
                 </div>
                 <div>
                     <label class="font-bold text-zinc-600 block mb-1">Spesifikasi Singkat</label>
-                    <input type="text" name="specification" placeholder="Misal: 1350mm | 200 Bar | Li-Ion" class="w-full px-3 py-2 sm:py-2.5 rounded-xl border border-zinc-300 focus:border-rail-500 focus:outline-none">
+                    <input type="text" name="specification" placeholder="Misal: 1350mm | 200 Bar | LiFePO4" class="w-full px-3 py-2 sm:py-2.5 rounded-xl border border-zinc-300 focus:border-rail-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="font-bold text-zinc-600 block mb-1">Upload Foto Baru</label>
@@ -466,10 +490,18 @@
                         <label class="text-[10px] font-mono uppercase text-zinc-400 font-bold block">Nama Komponen</label>
                         <input type="text" name="name" value="{{ $comp->name }}" class="w-full px-3 py-1.5 rounded-lg border border-zinc-300 font-bold">
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label class="text-[10px] font-mono uppercase text-zinc-400 font-bold block">Kode CAD</label>
                             <input type="text" name="code" value="{{ $comp->code }}" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 font-mono">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase text-zinc-400 font-bold block">Kategori</label>
+                            <select name="category" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300 bg-white">
+                                @foreach(['Sasis & Rangka', 'Sistem Pengecatan', 'Kontrol & Elektrikal', 'Penggerak & Roda', 'Penggerak & Rem', 'Sasis & Ergonomi', 'Dokumen Teknis'] as $cat)
+                                    <option value="{{ $cat }}" {{ $comp->category === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="text-[10px] font-mono uppercase text-zinc-400 font-bold block">Spesifikasi</label>
@@ -480,11 +512,28 @@
                         <label class="text-[10px] font-mono uppercase text-zinc-400 font-bold block">Deskripsi</label>
                         <textarea name="description" rows="2" class="w-full px-2.5 py-1.5 rounded-lg border border-zinc-300">{{ $comp->description }}</textarea>
                     </div>
-                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-zinc-100">
-                        <input type="file" name="image" class="text-[10px] text-zinc-500 max-w-[180px]">
-                        <div class="flex items-center gap-2">
-                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-rail-500 text-white font-bold transition">
-                                Simpan
+                    <div class="space-y-2 pt-2 border-t border-zinc-100">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] uppercase text-zinc-500 font-bold block mb-0.5">Pilih dari Galeri:</label>
+                                <select name="existing_image" class="w-full px-2 py-1.5 rounded-lg border border-zinc-300 bg-white text-[11px]">
+                                    <option value="{{ $comp->image_path }}">{{ basename($comp->image_path) }} (Saat Ini)</option>
+                                    @foreach($availableImages as $ai)
+                                        @if($ai !== $comp->image_path)
+                                            <option value="{{ $ai }}">{{ basename($ai) }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-zinc-500 font-bold block mb-0.5">Atau Upload Gambar Baru:</label>
+                                <input type="file" name="image" accept="image/*" class="w-full text-[11px] text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-rail-500 file:text-white hover:file:bg-rail-600">
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-1">
+                            <button type="submit" class="px-4 py-1.5 rounded-lg bg-zinc-900 hover:bg-rail-500 text-white font-bold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-floppy-disk text-xs"></i>
+                                <span>Simpan Perubahan</span>
                             </button>
                         </div>
                     </div>
@@ -697,50 +746,30 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- TAB 6: EDIT SEMUA ELEMEN TEKS & ANGKA WEBSITE                         -->
+    <!-- TAB 6: PENGATURAN PASSWORD ADMIN                                      -->
     <!-- ===================================================================== -->
-    <div x-show="tab === 'elemen'" class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-zinc-200 shadow-sm" x-cloak>
-        <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6 sm:space-y-8">
+    <div x-show="tab === 'password'" class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-zinc-200 shadow-sm max-w-xl mx-auto space-y-6" x-cloak>
+        <div class="border-b border-zinc-200 pb-4">
+            <h2 class="text-lg sm:text-xl font-extrabold text-zinc-900 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-rail-500"></i>
+                <span>Ganti Password Akses Admin</span>
+            </h2>
+            <p class="text-xs text-zinc-500 mt-1">Ubah kata sandi untuk login ke panel kontrol CMS HI 102.</p>
+        </div>
+
+        <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-4">
             @csrf
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4">
-                <div>
-                    <h2 class="text-lg sm:text-xl font-extrabold text-zinc-900">Edit Seluruh Elemen Landing Page</h2>
-                    <p class="text-xs text-zinc-500">Ubah judul, subjudul, angka statistik, problem, solution, hingga teks marquee.</p>
-                </div>
-                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 sm:py-3 rounded-full bg-rail-500 hover:bg-rail-600 text-white text-xs font-bold shadow-md shadow-rail-500/30 transition inline-flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan Semua Perubahan</span>
-                </button>
+            <input type="hidden" name="active_tab" value="password">
+            <div>
+                <label class="block text-xs font-bold text-zinc-700 mb-1">Password Admin Baru</label>
+                <input type="text" name="admin_password" value="{{ $settings['admin_password'] ?? 'admin123' }}" required class="w-full px-3 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm font-mono focus:border-rail-500 focus:outline-none">
+                <span class="text-[10px] text-zinc-400 block mt-1">Default: admin123</span>
             </div>
 
-            @foreach($settingsGrouped as $groupName => $groupItems)
-            @if($groupName !== 'images')
-            <div class="space-y-3.5">
-                <h3 class="text-xs font-mono uppercase tracking-wider text-rail-600 font-bold border-b border-zinc-100 pb-2">
-                    Grup Elemen: {{ strtoupper($groupName) }}
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    @foreach($groupItems as $item)
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-700 mb-1">{{ $item->label }} <span class="font-mono text-[10px] text-zinc-400">({{ $item->key }})</span></label>
-                        @if($item->type === 'textarea')
-                            <textarea name="{{ $item->key }}" rows="3" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs focus:border-rail-500 focus:outline-none">{{ $item->value }}</textarea>
-                        @else
-                            <input type="text" name="{{ $item->key }}" value="{{ $item->value }}" class="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs focus:border-rail-500 focus:outline-none">
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-            @endforeach
-
-            <div class="pt-4 border-t border-zinc-100">
-                <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-full bg-rail-500 hover:bg-rail-600 text-white text-xs font-bold shadow-md shadow-rail-500/30 transition inline-flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Simpan Semua Perubahan Teks</span>
-                </button>
-            </div>
+            <button type="submit" class="w-full py-2.5 sm:py-3 rounded-xl bg-rail-500 hover:bg-rail-600 text-white text-xs sm:text-sm font-bold shadow-md shadow-rail-500/30 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Simpan Password Baru</span>
+            </button>
         </form>
     </div>
 

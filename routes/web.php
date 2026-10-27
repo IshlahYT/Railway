@@ -16,6 +16,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/sync-seeder', [AdminController::class, 'syncSeeder'])->name('sync_seeder');
 
     // Route Data Pengujian
     Route::post('/tests', [AdminController::class, 'storeTest'])->name('tests.store');
@@ -29,7 +30,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Route Komponen Produk & Galeri Implementasi
     Route::post('/components', [AdminController::class, 'storeComponent'])->name('components.store');
-    Route::put('/components/{id}', [AdminController::class, 'updateComponent'])->name('components.update');
+    Route::match(['put', 'post'], '/components/{id}', [AdminController::class, 'updateComponent'])->name('components.update');
     Route::delete('/components/{id}', [AdminController::class, 'deleteComponent'])->name('components.delete');
 
     // Route Tim Pengembang

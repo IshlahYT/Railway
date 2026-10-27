@@ -8,10 +8,10 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -23,8 +23,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     colors: {
                         rail: {
@@ -49,6 +49,12 @@
 
     <style>
         [x-cloak] { display: none !important; }
+        html, body, button, input, select, textarea, pre, code {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        .font-mono, [class*="font-mono"] {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
         body { background-color: #FAFAFA; color: #18181B; overflow-x: hidden; }
         .bento-card { transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
         .bento-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -15px rgba(249, 115, 22, 0.15); }
@@ -73,7 +79,7 @@
             </a>
             <div class="hidden lg:flex items-center gap-2 text-zinc-500 font-mono text-xs bg-zinc-100 px-3 py-1.5 rounded-full">
                 <span class="w-2 h-2 rounded-full bg-rail-500 animate-pulse"></span>
-                <span>{{ $settings['location_tag'] ?? 'Indonesia • R54-70 Track Standard' }}</span>
+                <span>{{ $settings['location_tag'] ?? 'Indonesia' }}</span>
                 <span id="live-clock" class="ml-2 text-zinc-800 font-semibold"></span>
             </div>
         </div>
